@@ -142,7 +142,7 @@ import { handleCombatUpdate } from "./module/helpers/automation/combat";
 import { handleActorExport, validForExport } from "./module/helpers/io";
 import { targetsFromTemplate } from "./module/flows/_template";
 import { extendTokenConfig, LancerToken, LancerTokenDocument } from "./module/token";
-import { applyGlobalDragListeners } from "./module/helpers/dragdrop";
+import { applyGlobalDragListeners, FoundryDropData } from "./module/helpers/dragdrop";
 import { gridDist } from "./module/helpers/automation/targeting";
 import CompconLoginForm from "./module/helpers/compcon-login-form";
 import { LancerCombat, LancerCombatant } from "./module/combat/lancer-combat";
@@ -192,6 +192,7 @@ import { onHotbarDrop } from "./module/flows/hotbar";
 import { registerFlows } from "./module/flows/register-flows";
 import { LancerNPCFeatureSheet } from "./module/item/npc-feature-sheet";
 import { miniProfile } from "./module/helpers/chat";
+import { onDropCanvasData } from "./module/helpers/drop-statuses";
 
 const lp = LANCER.log_prefix;
 
@@ -769,6 +770,7 @@ Hooks.on("createCombat", (_actor: Actor) => {
 Hooks.on("deleteCombat", (_actor: Actor) => {
   game.action_manager?.update();
 });
+
 Hooks.on("updateCombat", (_combat: Combat, changes: DeepPartial<Combat["data"]>) => {
   if (getAutomationOptions().remove_templates && "turn" in changes && game.user?.isGM) {
     canvas.templates?.placeables.forEach(t => {
@@ -926,6 +928,10 @@ Hooks.on("renderChatMessage", async (cm: ChatMessage, html: JQuery, data: any) =
 
 Hooks.on("hotbarDrop", (_bar: any, data: any, slot: number) => {
   onHotbarDrop(_bar, data, slot);
+});
+
+Hooks.on("dropCanvasData", async (_canvas, data: FoundryDropData) => {
+  await onDropCanvasData(_canvas, data);
 });
 
 /**
